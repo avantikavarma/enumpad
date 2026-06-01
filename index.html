@@ -639,7 +639,21 @@
                         <div class="timeline-card-main">
                             <div class="timeline-phase-label">Phase 2</div>
                             <div class="timeline-title">OLED Interfacing & Core Rendering</div>
-                            <p class="timeline-details">Connected the OLED via I2C; rendered clean text lines and formatted stock layout grids natively on the single display asset.</p>
+                            <p class="timeline-details">Connected the OLED via I2C and SPI.</p>
+                        </div>
+                        <span class="timeline-status-pill complete">Complete</span>
+                    </div>
+                </div>
+
+                <div class="timeline-phase-block">
+                    <div class="timeline-node complete">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="timeline-card complete">
+                        <div class="timeline-card-main">
+                            <div class="timeline-phase-label">Phase 3</div>
+                            <div class="timeline-title"> AWS Iot Lambda enablement </div>
+                            <p class="timeline-details"> Write a custom Lambda function integrate with a finance API, to pull real time stock market data onto the OLED screen. User will be able to enter stocks of interest, and be able to monitor them including deciding whether to buy, or sell according to their market gain or loss</p>
                         </div>
                         <span class="timeline-status-pill complete">Complete</span>
                     </div>
@@ -651,9 +665,9 @@
                     </div>
                     <div class="timeline-card in-progress">
                         <div class="timeline-card-main">
-                            <div class="timeline-phase-label">Phase 3</div>
+                            <div class="timeline-phase-label">Phase 4</div>
                             <div class="timeline-title">Sensor Calibration & Input Hooks</div>
-                            <p class="timeline-details">Mapping on-board accelerometer coordinates to drive clean display page updates. Initializing SW[2] interrupt callbacks to safely process incoming terminal text inputs.</p>
+                            <p class="timeline-details">Mapping on-board accelerometer coordinates to drive clean display page updates. Initializing SW[2] to take terminal inputs.</p>
                         </div>
                         <span class="timeline-status-pill in-progress">In Progress</span>
                     </div>
