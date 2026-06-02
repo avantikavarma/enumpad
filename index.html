@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Market Ticker | EEC 172 Project Proposal</title>
+    <title>IoT Stock Market Ticker | EEC 172 Project Presentation</title>
     <style>
         :root {
             --bg-color: #fcfbfa;
@@ -336,7 +336,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 1.5rem;
+            gap: 1‘.5rem;
         }
 
         .timeline-card.complete {
@@ -374,7 +374,14 @@
         .timeline-details {
             font-size: 0.95rem;
             color: #555555;
-            margin-bottom: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-owner {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent-orange);
+            margin-top: 0.25rem;
         }
 
         .timeline-status-pill {
@@ -417,7 +424,7 @@
     <section class="hero-section">
         <div>
             <div class="header-top">
-                <div>• BUILD v2.4.1 — PROJECT_DEMO::TECHNICAL</div>
+                <div>• BUILD v3.0.0 — PRESENTATION::TECHNICAL</div>
                 <div>STATUS: LIVE — <span id="live-clock">00:00:00</span></div>
             </div>
 
@@ -427,10 +434,10 @@
         </div>
         
         <div class="hero-main">
-            <div class="tagline">EEC 172 — Project Proposal</div>
-            <h1>IoT Market<br>Ticker</h1>
+            <div class="tagline">Overview</div>
+            <h1>IoT Stock Market<br>Ticker</h1>
             <div class="hero-description">
-                <p>A Wi-Fi-enabled Live Market Ticker and Portfolio Desk Toy built on the TI CC3200 — real-time stock prices, edge alerts, and integrated sensor tracking controls.</p>
+                <p>A Wi-Fi-enabled IoT desk toy that displays real-time stock prices and trading signals directly on an embedded system powered by the TI CC3200 and AWS cloud pipeline.</p>
             </div>
             <div class="authors">Jia Mohan & Avantika Varma</div>
         </div>
@@ -438,127 +445,249 @@
 
     <main class="content-wrapper">
         <section class="section-container">
-            <h2>1. Description</h2>
-            <p>The proposed product is a Wi-Fi-enabled Live Market Ticker and Portfolio Desk Toy. Utilizing the Texas Instruments CC3200, this embedded device acts as a standalone financial monitor. It connects directly to the internet via local Wi-Fi to query real-time stock or cryptocurrency valuations from standard open-source financial REST API endpoints such as Finnhub or CoinGecko.</p>
-            <p>The core application parses incoming JavaScript Object Notation (JSON) payloads to isolate target market strings, current price indicators, and daily standard evaluation metrics. This compiled state matrix is outputted directly onto an on-board hardware visual dashboard via an OLED display module. Crucially, the system utilizes two unique types of physical sensor and hardware control configurations: an on-board tactile switch (SW[2]) allowing localized user logic routines to signal the UART interface to append additional stock tickers dynamically from a terminal, and an integrated on-board accelerometer allowing gestures or tilts to swipe smoothly through active stock/asset pages. All performance updates, warnings, or rate metrics are displayed exclusively on the localized OLED hardware window.</p>
+            <h2>Project Objectives</h2>
+            <h3>Quick Description</h3>
+            <p>We are designing a Wi-Fi-enabled IoT desk toy that displays real-time stock prices and trading signals. It uses the TI CC3200 microcontroller to connect to AWS IoT, which triggers a Lambda function to pull live prices from Yahoo Finance. The current price, daily change, and a BUY/SELL/HOLD signal are all rendered on an OLED display — no phone or computer required.</p>
+            
+            <h3>Similar Products & Differences</h3>
+            <p>Similar existing products include the Bloomberg Terminal, the Robinhood mobile app, and DIY LED ticker displays. Ours is different because it is fully self-contained on a $5 embedded device with no app or browser needed, uses a physical accelerometer for gesture-based navigation between stocks, and routes data through a real cloud pipeline (AWS IoT Shadow + Lambda) rather than a direct API call.</p>
         </section>
 
         <section class="section-container">
-            <h2>2. Design</h2>
-            <h3>Functional Specification</h3>
-            <p>The system operates in a continuous polling loop, balanced by hardware delay timers to respect target API endpoints rate limitations. Upon device initialization, system initialization routines handle internal structures, configure interface profiles, check local wireless networks, and initiate an encrypted network pipeline. The core software handles remote endpoint queries, handles JSON validation checks, assesses extracted data parameters against local values, outputs data matrices directly onto the hardware OLED display board, and handles page transitions driven by user gesture parameters before starting the next update routine.</p>
-            
-            <h3>System Architecture</h3>
-            <p>Architectural Block Diagram Description:</p>
+            <h2>Block Diagram</h2>
+            <h3>Modules and Relationships</h3>
             <ul>
-                <li><strong>Microcontroller Core:</strong> TI CC3200 LaunchPad manages networking, API requests, data parsing, terminal communications, and peripheral control.</li>
-                <li><strong>Communication / Cloud Service:</strong>
-                    <ul>
-                        <li><em>Network Processor:</em> CC3200's onboard Wi-Fi connects to the local router.</li>
-                        <li><em>Cloud API:</em> Third-party financial REST API providing data in JSON format over HTTPS.</li>
-                    </ul>
-                </li>
-                <li><strong>Input Components (Sensors & Hardware Switches):</strong>
-                    <ul>
-                        <li><em>Tactile Switch (SW[2]):</em> Configured as a hardware interrupt pin to trigger terminal polling listeners, allowing users to enter and load new stock assets dynamically into memory.</li>
-                        <li><em>On-Board Accelerometer:</em> Tracks physical spatial tilt and acceleration changes over I2C/SPI to detect swipe movements, cycling cleanly between stock pages.</li>
-                    </ul>
-                </li>
-                <li><strong>Output Component:</strong>
-                    <ul>
-                        <li><em>OLED Screen:</em> Connected via the shared serial peripheral bus line to serve as the unified display dashboard for active stock codes, dynamic evaluation prices, threshold metrics, and system status messages.</li>
-                    </ul>
-                </li>
+                <li><strong>Cloud Layer:</strong> AWS IoT Shadow, Lambda function, Yahoo Finance API. Lambda is triggered when the device POSTs a desired ticker; it fetches the price and writes it back to the shadow's reported state.</li>
+                <li><strong>CC3200 Core:</strong> Three internal modules: Wi-Fi Stack (connects and handles TLS), JSON Parser (extracts price/change/alert_color from shadow response), Display Renderer (formats and draws to OLED).</li>
+                <li><strong>Inputs:</strong> SW[2] button (hardware interrupt → UART terminal reads new ticker string); On-board accelerometer (X/Y tilt thresholds → page swipe between 5 stocks).</li>
+                <li><strong>Output:</strong> 128×128 SPI OLED displaying ticker symbol, price, daily change, BUY/SELL/HOLD signal, and page counter.</li>
+                <li><strong>Data Flow:</strong> Device POSTs desired.ticker → Lambda fetches price → shadow reported state updated → device GETs shadow → parses JSON → renders OLED.</li>
             </ul>
 
             <div class="diagram-container">
                 <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
                     <rect width="800" height="500" fill="#ffffff" rx="8"/>
-                    <g fill="none" stroke="#e05a36" stroke-width="2.5">
-                        <path d="M 170 145 L 270 145" stroke="#666" stroke-width="2" stroke-dasharray="4"/>
-                        <path d="M 270 175 L 170 175" stroke="#00cc44" stroke-width="2"/>
-                        <path d="M 180 305 L 270 305"/>
-                        <path d="M 180 365 L 270 365"/>
-                        <path d="M 530 250 L 600 250"/>
+                    
+                    <g fill="none" stroke-width="2.5">
+                        <path d="M 170 135 L 270 135" stroke="#e05a36" stroke-dasharray="4"/>
+                        <path d="M 270 165 L 170 165" stroke="#00cc44"/>
+                        <path d="M 180 305 L 270 305" stroke="#666"/>
+                        <path d="M 180 365 L 270 365" stroke="#666"/>
+                        <path d="M 530 250 L 600 250" stroke="#443366"/>
                     </g>
 
-                    <g fill="#e05a36">
+                    <g fill="#e05a36"><polygon points="265,135 255,130 255,140"/></g>
+                    <g fill="#00cc44"><polygon points="175,165 185,160 185,170"/></g>
+                    <g fill="#666">
                         <polygon points="265,305 255,300 255,310"/>
                         <polygon points="265,365 255,360 255,370"/>
-                        <polygon points="595,250 585,245 585,255"/>
                     </g>
+                    <g fill="#443366"><polygon points="595,250 585,245 585,255"/></g>
                     
                     <g font-family="monospace" font-size="12" fill="#1a1a1a">
                         <rect x="270" y="80" width="260" height="340" fill="#fcfbfa" stroke="#e05a36" stroke-width="3" rx="4"/>
                         <rect x="270" y="80" width="260" height="35" fill="#e05a36"/>
-                        <text x="400" y="102" font-weight="bold" fill="#ffffff" text-anchor="middle" font-size="13">MICROCONTROLLER CORE</text>
+                        <text x="400" y="102" font-weight="bold" fill="#ffffff" text-anchor="middle" font-size="13">CC3200 EMBEDDED CORE</text>
                         
-                        <rect x="290" y="140" width="220" height="45" fill="#f1ede8" stroke="#333" rx="3"/>
-                        <text x="400" y="167" text-anchor="middle" font-weight="bold">TI CC3200 Network Processor</text>
+                        <rect x="285" y="130" width="230" height="50" fill="#f1ede8" stroke="#333" rx="3"/>
+                        <text x="400" y="150" text-anchor="middle" font-weight="bold" font-size="11">Wi-Fi Stack & TLS Engine</text>
+                        <text x="400" y="168" text-anchor="middle" font-size="9" fill="#e05a36">Owner: Jia</text>
                         
-                        <rect x="290" y="210" width="220" height="40" fill="#e2edf7" stroke="#333" rx="3"/>
-                        <text x="400" y="234" text-anchor="middle">Data Parsing Loop (JSON)</text>
+                        <rect x="285" y="210" width="230" height="50" fill="#e2edf7" stroke="#333" rx="3"/>
+                        <text x="400" y="230" text-anchor="middle" font-weight="bold" font-size="11">JSON Parsing Engine</text>
+                        <text x="400" y="248" text-anchor="middle" font-size="9" fill="#666">Owner: Jia & Avantika</text>
                         
-                        <rect x="290" y="270" width="220" height="40" fill="#e2edf7" stroke="#333" rx="3"/>
-                        <text x="400" y="294" text-anchor="middle">Threshold Evaluation Logic</text>
-                        
-                        <rect x="290" y="330" width="220" height="45" fill="#f9f2e6" stroke="#333" rx="3"/>
-                        <text x="400" y="352" text-anchor="middle">Peripheral Interface Matrix</text>
-                        <text x="400" y="364" text-anchor="middle" font-size="9" fill="#666">(GPIO Interrupts / I2C Shared Bus)</text>
+                        <rect x="285" y="290" width="230" height="50" fill="#f9f2e6" stroke="#333" rx="3"/>
+                        <text x="400" y="310" text-anchor="middle" font-weight="bold" font-size="11">OLED Display Renderer</text>
+                        <text x="400" y="328" text-anchor="middle" font-size="9" fill="#b17e22">Owner: Avantika</text>
 
-                        <rect x="30" y="100" width="140" height="110" fill="#fafafa" stroke="#666" rx="4"/>
-                        <text x="100" y="125" font-weight="bold" text-anchor="middle" fill="#666">CLOUD SERVICE</text>
-                        <path d="M65,170 C65,160 75,152 85,152 C90,152 95,155 98,158 C102,152 112,152 118,156 C125,156 130,162 130,170 C130,178 122,162 115,162 L75,162 C68,162 65,178 65,170 Z" fill="#e2edf7" stroke="#333"/>
-                        <text x="100" y="172" font-size="10" text-anchor="middle" font-weight="bold" fill="#1a1a1a">Financial API</text>
-                        <text x="100" y="195" font-size="10" text-anchor="middle" fill="#666">HTTPS / JSON</text>
+                        <rect x="285" y="360" width="230" height="45" fill="#fafafa" stroke="#333" rx="3"/>
+                        <text x="400" y="380" text-anchor="middle" font-weight="bold" font-size="11">Sensor Hooks Loop</text>
+                        <text x="400" y="395" text-anchor="middle" font-size="9" fill="#666">Owner: Jia & Avantika</text>
+                        
+                        <rect x="20" y="80" width="150" height="130" fill="#fafafa" stroke="#666" rx="4"/>
+                        <text x="95" y="105" font-weight="bold" text-anchor="middle" fill="#666">AWS CLOUD LAYER</text>
+                        <text x="95" y="130" font-size="10" text-anchor="middle" font-weight="bold">IoT Shadow State</text>
+                        <text x="95" y="150" font-size="10" text-anchor="middle" fill="#e05a36">AWS Lambda</text>
+                        <text x="95" y="170" font-size="9" text-anchor="middle" fill="#666">↕ (REST Integration)</text>
+                        <text x="95" y="190" font-size="10" text-anchor="middle" font-weight="bold" fill="#2e6950">Yahoo Finance API</text>
 
-                        <rect x="20" y="265" width="160" height="135" fill="#fafafa" stroke="#333" rx="4"/>
-                        <text x="100" y="285" font-weight="bold" text-anchor="middle">SENSORS & INPUTS</text>
+                        <rect x="20" y="265" width="160" height="145" fill="#fafafa" stroke="#333" rx="4"/>
+                        <text x="100" y="285" font-weight="bold" text-anchor="middle">HARDWARE INPUTS</text>
                         
-                        <circle cx="50" cy="315" r="4" fill="#333"/>
-                        <circle cx="80" cy="315" r="4" fill="#333"/>
-                        <path d="M 50 311 L 75 298" stroke="#333" stroke-width="2.5"/>
-                        <text x="95" y="319" font-size="10" font-weight="bold">SW[2] Switch</text>
+                        <circle cx="45" cy="315" r="4" fill="#333"/>
+                        <circle cx="70" cy="315" r="4" fill="#333"/>
+                        <path d="M 45 311 L 65 298" stroke="#333" stroke-width="2.5"/>
+                        <text x="85" y="319" font-size="10" font-weight="bold">SW[2] Button</text>
+                        <text x="85" y="332" font-size="8" fill="#666">(Terminal Interrupt)</text>
                         
-                        <rect x="42" y="348" width="40" height="26" fill="#eae1f7" stroke="#66597a" stroke-width="1.5" rx="2"/>
-                        <text x="62" y="364" font-size="9" font-weight="bold" text-anchor="middle" fill="#443366">X/Y/Z</text>
-                        <text x="95" y="364" font-size="10" font-weight="bold">Accelerometer</text>
-                        <text x="100" y="390" font-size="8.5" fill="#666" text-anchor="middle">(Add via Terminal / Swipe Pages)</text>
+                        <rect x="35" y="358" width="35" height="26" fill="#eae1f7" stroke="#66597a" stroke-width="1.5" rx="2"/>
+                        <text x="52" y="374" font-size="9" font-weight="bold" text-anchor="middle" fill="#443366">X/Y</text>
+                        <text x="85" y="374" font-size="10" font-weight="bold">Accelerometer</text>
+                        <text x="85" y="387" font-size="8" fill="#666">(Tilt Gesture)</text>
 
-                        <rect x="600" y="175" width="180" height="150" fill="#111" stroke="#333" rx="6"/>
-                        <rect x="600" y="175" width="180" height="25" fill="#222"/>
-                        <circle cx="615" cy="187" r="3" fill="#ff5555"/>
-                        <circle cx="625" cy="187" r="3" fill="#ffaa00"/>
-                        <circle cx="635" cy="187" r="3" fill="#00ff66"/>
+                        <rect x="600" y="160" width="180" height="170" fill="#111" stroke="#333" rx="6"/>
+                        <rect x="600" y="160" width="180" height="25" fill="#222"/>
+                        <circle cx="615" cy="172" r="3" fill="#ff5555"/>
+                        <circle cx="625" cy="172" r="3" fill="#ffaa00"/>
+                        <circle cx="635" cy="172" r="3" fill="#00ff66"/>
                         
-                        <text x="690" y="220" font-weight="bold" fill="#00ff66" text-anchor="middle" font-size="11">OLED MAIN SCREEN</text>
-                        <text x="615" y="250" fill="#fff" font-size="13" font-weight="bold">TSLA: $178.20</text>
-                        <text x="615" y="270" fill="#ff3333" font-size="10">▼ Alert: Exceeded Min</text>
-                        <text x="615" y="295" fill="#888" font-size="9">Page 2 of 5 (Tilt to Swipe)</text>
-                        <text x="690" y="316" font-size="8.5" fill="#666" text-anchor="middle">Unified Graphics Output via I2C</text>
+                        <text x="690" y="210" font-weight="bold" fill="#ffffff" text-anchor="middle" font-size="11">128x128 OLED DISPLAY</text>
+                        <text x="615" y="240" fill="#00ff66" font-size="14" font-weight="bold">AAPL: $182.45</text>
+                        <text x="615" y="260" fill="#00ff66" font-size="11">▲ +1.24% [BUY]</text>
+                        <text x="615" y="290" fill="#ffcc00" font-size="10">Page 1/5</text>
+                        <text x="690" y="318" font-size="8.5" fill="#888" text-anchor="middle">Unified Serial Pipeline (SPI)</text>
                     </g>
                 </svg>
             </div>
+
+            <h3>Firmware Logical Operations (Flowchart Analysis)</h3>
+            <p>The system runs an infinite polling loop tightly integrated with an interrupt service routine architecture to maintain low-power idle intervals while respecting API limits. The firmware operations are divided into five sequential computational execution steps:</p>
+            <ul>
+                <li><strong>System Initialization (INIT):</strong> Upon power delivery or hard reset events, the system stabilizes core bus registers—configuring low-level peripherals across GPIO, I2C, SPI, and RGB PWM drivers. Simultaneously, the embedded network stack opens a WPA2 local Wi-Fi handshake protocol and creates a secure SSL/TLS socket instance dedicated to cloud communications.</li>
+                <li><strong>Network Data Acquisition (FETCH_DATA):</strong> The CC3200 dynamically assembles an outbound HTTP GET request string mapped specifically to the financial API infrastructure. The core blocks its execution path to wait for incoming response data packets. If a connection failure happens, an error handling subroutine updates the OLED UI with a disconnection diagnostic warning, increments a local wait variable, and loops back to force a fresh network reconnect strategy.</li>
+                <li><strong>Data Stream Processing (PARSE_JSON):</strong> Once a response packet is acknowledged, the string buffer passes into a targeted JSON decoding loop. It securely extracts key elements: the alphanumeric stock ticker, current market evaluation price, daily variance ratio, and an epoch time validation string. If structural parsing failures happen, the module intercepts the break state and passes it to the evaluation block using default error flags.</li>
+                <li><strong>Conditional Algorithmic Evaluation (EVALUATE):</strong> The extracted pricing engine matches values against user-configured pricing thresholds. If the current price scales equal to or beyond the designated <em>Sell Threshold</em>, the system triggers a programmatic <code>RED Alert</code> latch. If it scales below or equal to the designated <em>Buy Threshold</em>, a <code>GREEN Alert</code> state maps to memory registers. Failing both criteria maintains a baseline neutral buffer state.</li>
+                <li><strong>Hardware Driver Synthesis & Idle States (UPDATE / IDLE):</strong> The output pipeline writes live formatted matrices straight down to the physical 128×128 SPI display. Concurrently, it sets the status colors of the RGB peripheral (Red/Green/Neutral) and activates a chime buzzer circuit if anomalous alerts are triggered. Following driver updates, the system slips into a 30-second low-stress sleep delay to comply with standard cloud traffic rate limitations.</li>
+                <li><strong>Asynchronous Interrupt Control (Button Press):</strong> Any physical interaction with the hardware button interface fires an immediate hardware edge interrupt handler. This event breaks the standard 30-second polling delay loop, flushes active JSON state registers, and forces an immediate branch back to the <code>FETCH_DATA</code> routine to handle immediate page switching metrics instantly.</li>
+            </ul>
+
+            <h3>Firmware Control Execution Flow</h3>
+            <div class="diagram-container">
+                <svg viewBox="0 0 800 680" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="800" height="680" fill="#ffffff" rx="8"/>
+                    
+                    <g fill="none" stroke="#e05a36" stroke-width="2.5">
+                        <path d="M 400 75 L 400 115"/>
+                        <path d="M 400 175 L 400 215"/>
+                        <path d="M 400 275 L 400 315"/>
+                        <path d="M 400 375 L 400 415"/>
+                        <path d="M 400 475 L 400 515"/>
+                        <path d="M 400 575 L 400 610 L 120 610 L 120 245 L 265 245"/>
+                        <path d="M 640 445 L 640 640 L 90 640 L 90 245 L 265 245" stroke="#443366" stroke-dasharray="4"/>
+                    </g>
+
+                    <g fill="#e05a36">
+                        <polygon points="400,115 395,105 405,105"/>
+                        <polygon points="400,215 395,205 405,205"/>
+                        <polygon points="400,315 395,305 405,305"/>
+                        <polygon points="400,415 395,405 405,405"/>
+                        <polygon points="400,515 395,505 405,505"/>
+                        <polygon points="265,245 255,240 255,250"/>
+                    </g>
+
+                    <g font-family="monospace" font-size="11" fill="#1a1a1a" text-anchor="middle">
+                        
+                        <rect x="310" y="25" width="180" height="50" fill="#f1ede8" stroke="#333" stroke-width="1.5" rx="25"/>
+                        <text x="400" y="54" font-weight="bold">POWER ON / RESET</text>
+
+                        <rect x="265" y="115" width="270" height="60" fill="#fafafa" stroke="#333" stroke-width="1.5" rx="4"/>
+                        <text x="400" y="137" font-weight="bold" fill="#e05a36">1. SYSTEM INITIALIZATION (INIT)</text>
+                        <text x="400" y="154" font-size="10" fill="#666">Stabilize Registers, Establish Wi-Fi & TLS</text>
+
+                        <rect x="265" y="215" width="270" height="60" fill="#fafafa" stroke="#333" stroke-width="1.5" rx="4"/>
+                        <text x="400" y="237" font-weight="bold" fill="#e05a36">2. DATA ACQUISITION (FETCH_DATA)</text>
+                        <text x="400" y="254" font-size="10" fill="#666">Assemble Outbound HTTP GET Request String</text>
+
+                        <rect x="265" y="315" width="270" height="60" fill="#fafafa" stroke="#333" stroke-width="1.5" rx="4"/>
+                        <text x="400" y="337" font-weight="bold" fill="#e05a36">3. STREAM PROCESSING (PARSE_JSON)</text>
+                        <text x="400" y="354" font-size="10" fill="#666">Decode Response Buffer, Extract Ticker/Price</text>
+
+                        <rect x="265" y="415" width="270" height="60" fill="#fafafa" stroke="#333" stroke-width="1.5" rx="4"/>
+                        <text x="400" y="437" font-weight="bold" fill="#e05a36">4. ALGORITHMIC EVALUATION (EVALUATE)</text>
+                        <text x="400" y="454" font-size="10" fill="#666">Compare Pricing Thresholds (RED/GREEN Alert)</text>
+
+                        <rect x="265" y="515" width="270" height="60" fill="#fafafa" stroke="#333" stroke-width="1.5" rx="4"/>
+                        <text x="400" y="537" font-weight="bold" fill="#e05a36">5. DRIVER SYNTHESIS & IDLE STATE</text>
+                        <text x="400" y="554" font-size="10" fill="#666">Write SPI Matrix to OLED, 30s Delay Slip</text>
+
+                        <rect x="560" y="385" width="210" height="60" fill="#eae1f7" stroke="#443366" stroke-width="2" rx="4"/>
+                        <text x="665" y="407" font-weight="bold" fill="#443366">ASYNC INTERRUPT CONTROL</text>
+                        <text x="665" y="424" font-size="10" font-weight="bold">Physical Button Push Event</text>
+                        <text x="665" y="437" font-size="9" fill="#66597a">Flush Registers & Force Branch</text>
+                        
+                        <text x="180" y="595" font-size="10" fill="#e05a36" text-anchor="start">30s Standard Infinite Loop Cycle</text>
+                        <text x="140" y="632" font-size="10" fill="#443366" text-anchor="start">Immediate Hardware Edge Interrupt Override Route</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3>Development Legend & Responsibilities</h3>
+            <ul>
+                <li><strong>Jia Mohan:</strong> Wi-Fi stack configuration, network socket stabilization initialization, and AWS Shadow outbound POST/GET pipeline communications.</li>
+                <li><strong>Avantika Varma:</strong> Hardware SPI OLED low-level configuration, drawing drivers matrix integration, and core rendering visualization buffers pipeline.</li>
+                <li><strong>Shared Modules (Both):</strong> Payload incoming JSON architecture decoding parsing, cloud custom AWS Lambda computational functions setup, and physical sensor mapping interrupt handlers hooks.</li>
+            </ul>
         </section>
 
         <section class="section-container">
-            <h2>3. Implementation Goals</h2>
-            <h3>Minimal Goals</h3>
-            <ul>
-                <li>Establish complete operational initialization parameters between the TI CC3200 board and standard network router points.</li>
-                <li>Formulate and test HTTP GET requests to open network ports, pulling raw strings safely down to structural system buffers and verifying response sizes.</li>
-            </ul>
-            <h3>Target Goals (Expected Prototype)</h3>
-            <ul>
-                <li>Incorporate full programmatic string decoding algorithms inside embedded C modules to extract accurate price variables from custom JSON packages.</li>
-                <li>Output clean alphanumeric symbols and formatted financial data arrays exclusively onto the hardware OLED display board.</li>
-                <li>Utilize terminal logging commands triggered via SW[2] interrupts to process fresh user string additions dynamically.</li>
-            </ul>
-            <h3>Stretch Goals</h3>
-            <ul>
-                <li>Configure complex cryptographic certificates and secure SSL/TLS socket connections directly through embedded memory configurations to handle strict production API endpoints.</li>
-                <li>Formulate background asynchronous configuration loops tracking the on-board accelerometer coordinates to allow physical tilt swipes to control visual display windows and show alert flags dynamically.</li>
-            </ul>
+            <h2>Progress Report</h2>
+            
+            <div class="timeline-track">
+                <div class="timeline-phase-block">
+                    <div class="timeline-node complete">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="timeline-card complete">
+                        <div class="timeline-card-main">
+                            <div class="timeline-phase-label">Phase 1 — Configuration</div>
+                            <div class="timeline-title">Network Initialization</div>
+                            <p class="timeline-details">TI CC3200 hardware integrated Wi-Fi networking micro-stack configured correctly; localized encrypted WPA2 baseline handshake routine executed and verified.</p>
+                            <div class="timeline-owner">Lead: Jia</div>
+                        </div>
+                        <span class="timeline-status-pill complete">Complete</span>
+                    </div>
+                </div>
+
+                <div class="timeline-phase-block">
+                    <div class="timeline-node complete">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="timeline-card complete">
+                        <div class="timeline-card-main">
+                            <div class="timeline-phase-label">Phase 2 — Drivers UI</div>
+                            <div class="timeline-title">OLED Interfacing & Core Rendering</div>
+                            <p class="timeline-details">Structural hardware configurations and execution scripts for fillScreen, drawChar, and OLED_PrintString methods compiled, mapped, and fully verified over SPI transmission bus line.</p>
+                            <div class="timeline-owner">Lead: Avantika</div>
+                        </div>
+                        <span class="timeline-status-pill complete">Complete</span>
+                    </div>
+                </div>
+
+                <div class="timeline-phase-block">
+                    <div class="timeline-node complete">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="timeline-card complete">
+                        <div class="timeline-card-main">
+                            <div class="timeline-phase-label">Phase 3 — Systems Pipeline</div>
+                            <div class="timeline-title">AWS IoT Lambda & Live Price Pipeline</div>
+                            <p class="timeline-details">Comprehensive end-to-end cloud pipeline deployment. Lambda function extracts accurate Yahoo Finance parameters, updates the IoT Shadow reported state dictionary, and routes payloads cleanly down to the physical OLED layout with real-time BUY/SELL/HOLD visual indicators.</p>
+                            <div class="timeline-owner">Lead: Jia & Avantika</div>
+                        </div>
+                        <span class="timeline-status-pill complete">Complete</span>
+                    </div>
+                </div>
+
+                <div class="timeline-phase-block">
+                    <div class="timeline-node in-progress">
+                        <div class="node-dot"></div>
+                    </div>
+                    <div class="timeline-card in-progress">
+                        <div class="timeline-card-main">
+                            <div class="timeline-phase-label">Phase 4 — Physical Integration</div>
+                            <div class="timeline-title">Sensor Calibration & Input Hooks</div>
+                            <p class="timeline-details">Actively optimizing programmatic accelerometer X/Y vector grid layout tracking to scale threshold triggers into page-swipe navigation controls. Concurrently wiring the SW[2] button hardware interrupt routine to catch incoming UART entry terminal data streams securely.</p>
+                            <p class="timeline-details"><em>Task Projection Note:</em> We expect to complete accelerometer gesture mapping and SW[2] terminal input within the next week. Integration with the existing polling loop is straightforward since both are interrupt-driven and slot in before the stock index increments.</p>
+                            <div class="timeline-owner">Lead: Jia & Avantika — ETA ~1 Week</div>
+                        </div>
+                        <span class="timeline-status-pill in-progress">In Progress</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Demo Video Structural Layout</h3>
+            <p>The upcoming prototype live video configuration will explicitly highlight the operational OLED display cycles scrolling through active pages (<strong>AAPL → NVDA → MSFT</strong>), presenting instant market pricing matrices, standard daily adjustments indicators, and contextualized colored BUY/SELL/HOLD signal values recalculating directly at the network edge.</p>
         </section>
 
         <section class="section-container">
@@ -576,257 +705,67 @@
                 <tbody>
                     <tr>
                         <td>TI CC3200 LaunchPad</td>
-                        <td>Main microcontroller, onboard network processor, and standard communication hub.</td>
+                        <td>Main microcontroller processing system, onboard dedicated hardware network engine, and execution stack hub.</td>
                         <td>$0.00</td>
                         <td>Provided by Lab / Class</td>
                     </tr>
                     <tr>
                         <td>On-board Accelerometer</td>
-                        <td>Integrated sensor module used to read X/Y/Z motion vectors to swipe stock pages.</td>
+                        <td>Integrated board-level sensor system configured to track movement variations across Cartesian vectors to trigger system swipe events.</td>
                         <td>$0.00</td>
                         <td>On-board Component</td>
                     </tr>
                     <tr>
                         <td>OLED Display Panel</td>
-                        <td>Compact visual monitor dashboard to output stock prices and status pages via I2C.</td>
+                        <td>128x128 monochrome graphical user output dashboard serving as system presentation display driven via hardware SPI bus lines.</td>
                         <td>$0.00</td>
                         <td>Provided by Lab / Class</td>
                     </tr>
                     <tr>
                         <td>Tactile Switches (SW[2])</td>
-                        <td>On-board push button configured to halt loops and route terminal addition strings.</td>
+                        <td>Integrated hardware tactile push button mapped to trigger standard edge interrupts to parse alphanumeric values across terminal inputs.</td>
                         <td>$0.00</td>
                         <td>On-board Component</td>
-                    </tr>
-                    <tr>
-                        <td>Miscellaneous Hardware Pack</td>
-                        <td>Hookup jumper wires, prototype breadboards, and structural connections.</td>
-                        <td>$5.00</td>
-                        <td>Lab Inventory / Amazon</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td>Total Estimated Cost</td>
-                        <td>Complete component architecture budget.</td>
-                        <td>~$5.00</td>
-                        <td></td>
                     </tr>
                 </tbody>
             </table>
         </section>
-
-        <section class="section-container">
-            <h2>5. Project Timeline</h2>
-            <div class="timeline-track">
-                <div class="timeline-phase-block">
-                    <div class="timeline-node complete">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                    </div>
-                    <div class="timeline-card complete">
-                        <div class="timeline-card-main">
-                            <div class="timeline-phase-label">Phase 1</div>
-                            <div class="timeline-title">Network initialization</div>
-                            <p class="timeline-details">CC3200 Wi-Fi stack configured; WPA2 handshake verified on local router endpoints.</p>
-                        </div>
-                        <span class="timeline-status-pill complete">Complete</span>
-                    </div>
-                </div>
-
-                <div class="timeline-phase-block">
-                    <div class="timeline-node complete">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                    </div>
-                    <div class="timeline-card complete">
-                        <div class="timeline-card-main">
-                            <div class="timeline-phase-label">Phase 2</div>
-                            <div class="timeline-title">OLED Interfacing & Core Rendering</div>
-                            <p class="timeline-details">Connected the OLED via I2C and SPI.</p>
-                        </div>
-                        <span class="timeline-status-pill complete">Complete</span>
-                    </div>
-                </div>
-
-                <div class="timeline-phase-block">
-                    <div class="timeline-node complete">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                    </div>
-                    <div class="timeline-card complete">
-                        <div class="timeline-card-main">
-                            <div class="timeline-phase-label">Phase 3</div>
-                            <div class="timeline-title"> AWS Iot Lambda enablement </div>
-                            <p class="timeline-details"> Write a custom Lambda function integrate with a finance API, to pull real time stock market data onto the OLED screen. User will be able to enter stocks of interest, and be able to monitor them including deciding whether to buy, or sell according to their market gain or loss</p>
-                        </div>
-                        <span class="timeline-status-pill complete">Complete</span>
-                    </div>
-                </div>
-
-                <div class="timeline-phase-block">
-                    <div class="timeline-node in-progress">
-                        <div class="node-dot"></div>
-                    </div>
-                    <div class="timeline-card in-progress">
-                        <div class="timeline-card-main">
-                            <div class="timeline-phase-label">Phase 4</div>
-                            <div class="timeline-title">Sensor Calibration & Input Hooks</div>
-                            <p class="timeline-details">Mapping on-board accelerometer coordinates to drive clean display page updates. Initializing SW[2] to take terminal inputs.</p>
-                        </div>
-                        <span class="timeline-status-pill in-progress">In Progress</span>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <script>
-        // 1. Live Header Clock Engine
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
-            document.getElementById('live-clock').textContent = timeString;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        // Simple continuous running logic for top presentation clock
+        setInterval(() => {
+            const clock = document.getElementById('live-clock');
+            if(clock) {
+                const now = new Date();
+                clock.innerText = now.toTimeString().split(' ')[0];
+            }
+        }, 1000);
 
-        // 2. Mock Market Content Generation for the Banner Ribbon
-        const stockAssets = [
-            { symbol: 'AAPL', price: '172.62', change: '+1.42%', up: true },
-            { symbol: 'TSLA', price: '178.20', change: '-3.15%', up: false },
-            { symbol: 'NVDA', price: '875.12', change: '+4.82%', up: true },
-            { symbol: 'BTC', price: '67,420', change: '+2.11%', up: true },
-            { symbol: 'ETH', price: '3,492.5', change: '-0.85%', up: false },
-            { symbol: 'GOOGL', price: '151.60', change: '+0.12%', up: true },
-            { symbol: 'AMZN', price: '175.35', change: '-1.10%', up: false }
+        // Dummy static stock dataset for presentation header decoration ribbon
+        const mockStocks = [
+            { t: 'AAPL', p: '182.45', c: '+1.24%', u: true },
+            { t: 'NVDA', p: '875.12', c: '+4.78%', u: true },
+            { t: 'MSFT', p: '415.60', c: '-0.32%', u: false },
+            { t: 'TSLA', p: '175.45', c: '-2.11%', u: false },
+            { t: 'AMD',  p: '160.20', c: '+0.85%', u: true }
         ];
 
-        function populateTicker() {
-            const container = document.getElementById('ticker-content');
-            // Duplicate array items three times to ensure loop spacing wraps across screens seamlessly
-            const tripleArray = [...stockAssets, ...stockAssets, ...stockAssets];
-            
-            container.innerHTML = tripleArray.map(asset => `
-                <div class="ticker-item">
-                    <span>${asset.symbol}</span>
-                    <span>$${asset.price}</span>
-                    <span class="${asset.up ? 'ticker-up' : 'ticker-down'}">${asset.change}</span>
-                </div>
-            `).join('');
+        const container = document.getElementById('ticker-content');
+        if (container) {
+            // Triple clone content data sequence array to construct absolute seamless wrapping scrolling look
+            const tripleDataset = [...mockStocks, ...mockStocks, ...mockStocks];
+            tripleDataset.forEach(stock => {
+                const item = document.createElement('div');
+                item.className = 'ticker-item';
+                item.innerHTML = `
+                    <span>${stock.t}</span> 
+                    <span>$${stock.p}</span> 
+                    <span class="${stock.u ? 'ticker-up' : 'ticker-down'}">${stock.c}</span>
+                `;
+                container.appendChild(item);
+            });
         }
-        populateTicker();
-
-        // 3. Dynamic Interactive Canvas Simulation (Falling Cash Vectors)
-        const canvas = document.getElementById('tickerCanvas');
-        const ctx = canvas.getContext('2d');
-
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        class Bill {
-            constructor(isBurst = false) {
-                this.isBurst = isBurst;
-                this.reset();
-                if (isBurst) {
-                    // Force start position to match center cursor click coordinates
-                    this.y = lastMouseY;
-                    this.x = lastMouseX + (Math.random() * 60 - 30);
-                    this.vy = Math.random() * -6 - 2; // Explode upward initially
-                    this.vx = Math.random() * 8 - 4;
-                }
-            }
-
-            reset() {
-                this.x = Math.random() * width;
-                this.y = this.isBurst ? height + 100 : Math.random() * -200 - 50;
-                this.width = Math.random() * 14 + 12;
-                this.height = this.width * 0.55;
-                this.vy = Math.random() * 1.5 + 1; // Constant fall speed vector
-                this.vx = Math.random() * 1.5 - 0.75;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = Math.random() * 0.03 - 0.015;
-                this.opacity = Math.random() * 0.25 + 0.1; // Kept light to prevent blocking text readability
-            }
-
-            update() {
-                this.y += this.vy;
-                this.x += this.vx + Math.sin(this.y / 30) * 0.3; // Swaying motion paths
-                this.rotation += this.rotationSpeed;
-
-                if (this.y > height + 50) {
-                    if (this.isBurst) {
-                        return false; // Eliminate burst items completely once off screen
-                    }
-                    this.reset();
-                }
-                return true;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.globalAlpha = this.opacity;
-                
-                // Draw light green background bank bill shape
-                ctx.fillStyle = '#85bb65';
-                ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
-                
-                // Fine inner monetary margin borders
-                ctx.strokeStyle = rgbaColorHex('#5e8a44', this.opacity);
-                ctx.lineWidth = 1;
-                ctx.strokeRect((-this.width / 2) + 2, (-this.height / 2) + 2, this.width - 4, this.height - 4);
-                
-                // Tiny central emblem stamp circle
-                ctx.beginPath();
-                ctx.arc(0, 0, this.height * 0.25, 0, Math.PI * 2);
-                ctx.fillStyle = '#5e8a44';
-                ctx.fill();
-                
-                ctx.restore();
-            }
-        }
-
-        function rgbaColorHex(hex, opacity) {
-            return hex;
-        }
-
-        const standardBillCount = 45;
-        let currencyVault = [];
-        for (let i = 0; i < standardBillCount; i++) {
-            currencyVault.push(new Bill(false));
-        }
-
-        let lastMouseX = width / 2;
-        let lastMouseY = height / 2;
-
-        // Trigger exploding bursts on ribbon mouse clicks
-        document.getElementById('stock-ticker').addEventListener('click', (e) => {
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            for (let i = 0; i < 15; i++) {
-                currencyVault.push(new Bill(true));
-            }
-        });
-
-        function engineLoop() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // Loop backwards to safely remove transient burst items
-            for (let i = currencyVault.length - 1; i >= 0; i--) {
-                const activeBill = currencyVault[i];
-                const alive = activeBill.update();
-                if (!alive) {
-                    currencyVault.splice(i, 1);
-                } else {
-                    activeBill.draw();
-                }
-            }
-            
-            requestAnimationFrame(engineLoop);
-        }
-        engineLoop();
     </script>
 </body>
 </html>
